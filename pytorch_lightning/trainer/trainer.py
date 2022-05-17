@@ -1156,6 +1156,10 @@ class Trainer(
         # strategy will configure model and move it to the device
         self.strategy.setup(self)
 
+        if self.strategy.restore_checkpoint_after_setup:
+            log.detail(f"{self.__class__.__name__}: restoring module and callbacks from checkpoint path: {ckpt_path}")
+            self._restore_modules_and_callbacks(ckpt_path)
+
         # hook
         if self.state.fn == TrainerFn.FITTING:
             self._call_callback_hooks("on_fit_start")
@@ -1163,9 +1167,6 @@ class Trainer(
 
         self._log_hyperparams()
 
-        if self.strategy.restore_checkpoint_after_setup:
-            log.detail(f"{self.__class__.__name__}: restoring module and callbacks from checkpoint path: {ckpt_path}")
-            self._restore_modules_and_callbacks(ckpt_path)
 
         # restore optimizers, etc.
         log.detail(f"{self.__class__.__name__}: restoring training state")
